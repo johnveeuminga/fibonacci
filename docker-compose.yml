@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  app:
+    build:
+      dockerfile: ./docker/app/Dockerfile
+      context: ./
+    ports:
+      - '8000:8000'
+    depends_on:
+      - redis
+      - db
+    networks:
+      - app
+    
+  db:
+    image: postgres:14.5-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app
+  redis:
+    image: redis:7.0.4-alpine
+    ports: 
+      - '6379:6379'
+    volumes:
+      - redis:/data
+    networks: 
+      - app
+
+networks:
+  app:
+
+volumes:
+  db:
+    driver: local
+  redis:
+    driver: local
